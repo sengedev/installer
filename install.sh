@@ -192,6 +192,9 @@ function Install_Compose(){
 
 function Set_Port(){
     DEFAULT_PORT=`expr $RANDOM % 55535 + 10000`
+    while netstat -tlpm | grep -q "$:DEFAULT_PORT"; do
+	DEFAULT_PORT=`expr $RANDOM % 55535 + 10000`
+    done
 
     while true; do
         read -p "设置 1Panel 端口（默认为$DEFAULT_PORT）：" PANEL_PORT
@@ -199,7 +202,10 @@ function Set_Port(){
         if [[ "$PANEL_PORT" == "" ]];then
             PANEL_PORT=$DEFAULT_PORT
         fi
-
+	if netstat -tlpm | grep -q "$:PANEL_PORT"; then
+ 	    echo "错误：端口被占用，请重新输入！"
+      	    continue
+ 	fi
         if ! [[ "$PANEL_PORT" =~ ^[1-9][0-9]{0,4}$ && "$PANEL_PORT" -le 65535 ]]; then
             echo "错误：输入的端口号必须在 1 到 65535 之间"
             continue
